@@ -1,12 +1,12 @@
-require("dotenv").config();
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
+require('dotenv').config();
+const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
 
-const Person = require("./modules/person");
+const Person = require('./modules/person');
 
 const app = express();
-app.use(express.static("dist"));
+app.use(express.static('dist'));
 app.use(express.json());
 app.use(cors());
 
@@ -15,22 +15,22 @@ function morganHandlerFnc(tokens, req, res) {
     tokens.method(req, res),
     tokens.url(req, res),
     tokens.status(req, res),
-    tokens.res(req, res, "content-length"),
-    "-",
-    tokens["response-time"](req, res),
-    "ms",
-    "- Body:",
+    tokens.res(req, res, 'content-length'),
+    '-',
+    tokens['response-time'](req, res),
+    'ms',
+    '- Body:',
     JSON.stringify(req.body),
-  ].join(" ");
+  ].join(' ');
 }
 
 app.use(morgan(morganHandlerFnc));
 
-app.get("/", function (request, response) {
-  response.send("Hello World");
+app.get('/', function (request, response) {
+  response.send('Hello World');
 });
 
-app.get("/info", function (request, response) {
+app.get('/info', function (request, response) {
   Person.find({}).then((mongoDbResponse) => {
     const info = `
       Phonebook has info for ${mongoDbResponse.length} people <br /><br />
@@ -40,13 +40,13 @@ app.get("/info", function (request, response) {
   });
 });
 
-app.get("/api/persons", function (request, response) {
+app.get('/api/persons', function (request, response) {
   Person.find({}).then((mongoDbResponse) => {
     response.json(mongoDbResponse);
   });
 });
 
-app.get("/api/persons/:id", async function (request, response, next) {
+app.get('/api/persons/:id', async function (request, response, next) {
   const id = request.params.id;
 
   try {
@@ -62,7 +62,7 @@ app.get("/api/persons/:id", async function (request, response, next) {
   }
 });
 
-app.post("/api/persons", async function (request, response, next) {
+app.post('/api/persons', async function (request, response, next) {
   const person = request.body;
   const phonebooksList = await Person.find({});
   const personAlreadyExists = phonebooksList.find(
@@ -71,7 +71,7 @@ app.post("/api/persons", async function (request, response, next) {
 
   if (personAlreadyExists) {
     if (personAlreadyExists) {
-      messageToSend = "Name must be unique";
+      messageToSend = 'Name must be unique';
     }
 
     return response.status(400).json({
@@ -92,7 +92,7 @@ app.post("/api/persons", async function (request, response, next) {
     .catch((error) => next(error));
 });
 
-app.put("/api/persons/:id", function (request, response, next) {
+app.put('/api/persons/:id', function (request, response, next) {
   const body = request.body;
 
   const person = {
@@ -103,7 +103,7 @@ app.put("/api/persons/:id", function (request, response, next) {
   Person.findByIdAndUpdate(
     request.params.id,
     { ...person },
-    { new: true, runValidators: true, context: "query" }
+    { new: true, runValidators: true, context: 'query' }
   )
     .then((updatedPerson) => {
       response.json(updatedPerson);
@@ -111,7 +111,7 @@ app.put("/api/persons/:id", function (request, response, next) {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", async function (request, response, next) {
+app.delete('/api/persons/:id', async function (request, response, next) {
   const id = request.params.id;
   try {
     await Person.findByIdAndDelete(id);
@@ -123,7 +123,7 @@ app.delete("/api/persons/:id", async function (request, response, next) {
 });
 
 function unknownEndpoint(request, response) {
-  response.status(404).send({ error: "unknown endpoint" });
+  response.status(404).send({ error: 'unknown endpoint' });
 }
 
 app.use(unknownEndpoint);
@@ -131,9 +131,9 @@ app.use(unknownEndpoint);
 function errorHandler(error, request, response, next) {
   console.log(error.message);
 
-  if (error.name === "CastError") {
-    return response.status(400).send({ error: "malformatted id" });
-  } else if (error.name === "ValidationError") {
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' });
+  } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message });
   }
 
